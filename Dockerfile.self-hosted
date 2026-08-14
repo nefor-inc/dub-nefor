@@ -20,6 +20,8 @@ WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm -r --filter "./packages/**" build
+RUN pnpm --filter web prisma:generate \
+  && pnpm --filter web exec tsc --noEmit --pretty false
 RUN NEXTAUTH_SECRET=build-only \
   UPSTASH_REDIS_REST_TOKEN=build-only \
   TINYBIRD_API_KEY=build-only \
