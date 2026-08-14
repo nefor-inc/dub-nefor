@@ -1,18 +1,27 @@
 import Stripe from "stripe";
 import { StripeMode } from "../types";
 
-export const stripe = new Stripe(`${process.env.STRIPE_SECRET_KEY}`, {
-  apiVersion: "2025-05-28.basil",
-  appInfo: {
-    name: "Dub.co",
-    version: "0.1.0",
+const selfHostedStripePlaceholder =
+  process.env.NEXT_PUBLIC_SELF_HOSTED === "true"
+    ? "sk_test_self_hosted_billing_disabled"
+    : undefined;
+
+export const stripe = new Stripe(
+  `${process.env.STRIPE_SECRET_KEY || selfHostedStripePlaceholder}`,
+  {
+    apiVersion: "2025-05-28.basil",
+    appInfo: {
+      name: "Dub.co",
+      version: "0.1.0",
+    },
   },
-});
+);
 
 const secretMap: Record<StripeMode, string | undefined> = {
-  live: process.env.STRIPE_APP_SECRET_KEY,
-  test: process.env.STRIPE_APP_SECRET_KEY_TEST,
-  sandbox: process.env.STRIPE_APP_SECRET_KEY_SANDBOX,
+  live: process.env.STRIPE_APP_SECRET_KEY || selfHostedStripePlaceholder,
+  test: process.env.STRIPE_APP_SECRET_KEY_TEST || selfHostedStripePlaceholder,
+  sandbox:
+    process.env.STRIPE_APP_SECRET_KEY_SANDBOX || selfHostedStripePlaceholder,
 };
 
 // Stripe Integration App client
