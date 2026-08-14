@@ -3,23 +3,27 @@ FROM node:23.11.0-bookworm-slim AS build
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS=--max-old-space-size=6144
 ENV NEXT_PUBLIC_SELF_HOSTED=true
 ENV NEXT_PUBLIC_APP_DOMAIN=qr.nefor.vip
 ENV NEXT_PUBLIC_APP_SHORT_DOMAIN=qrlink.nefor.vip
 # Build-time placeholders only. Runtime values are supplied by Coolify.
 ENV DATABASE_URL=mysql://dub:build@127.0.0.1:3306/dub
-ENV NEXTAUTH_SECRET=build-only-not-used-at-runtime
 ENV UPSTASH_REDIS_REST_URL=http://127.0.0.1:8079
-ENV UPSTASH_REDIS_REST_TOKEN=build-only-not-used-at-runtime
 ENV TINYBIRD_API_URL=https://api.tinybird.co
-ENV TINYBIRD_API_KEY=build-only-not-used-at-runtime
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm -r --filter "./packages/**" build
-RUN pnpm --filter web build
+RUN NEXTAUTH_SECRET=build-only \
+  UPSTASH_REDIS_REST_TOKEN=build-only \
+  TINYBIRD_API_KEY=build-only \
+  pnpm --filter web build
 
 FROM node:23.11.0-bookworm-slim AS runtime
 
@@ -28,7 +32,10 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-RUN npm install --global prisma@6.19.1
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install --global prisma@6.19.1
 WORKDIR /app
 COPY --from=build /app/apps/web/.next/standalone ./
 COPY --from=build /app/apps/web/.next/static ./apps/web/.next/static
