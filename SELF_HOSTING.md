@@ -22,10 +22,10 @@ Before deployment:
 
 1. Create the GitHub OAuth app with callback
    `https://qr.nefor.vip/api/auth/callback/github`.
-2. Create Tinybird and QStash projects and copy their production credentials.
+2. Create Tinybird, QStash, and Upstash Vector projects and copy their
+   production credentials.
 3. Create public/private R2 buckets and S3 API credentials.
 4. Create the `qr@nefor.vip` Mailcow mailbox.
 5. Add both proxied DNS records and enable Cloudflare visitor-location headers.
 6. Create a Coolify Docker Compose resource from `compose.self-hosted.yaml`,
    attach `https://qr.nefor.vip` to the `app` service, and deploy `latest`.
-

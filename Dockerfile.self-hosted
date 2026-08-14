@@ -28,6 +28,8 @@ RUN NEXTAUTH_SECRET=build-only \
   QSTASH_TOKEN=build-only \
   QSTASH_CURRENT_SIGNING_KEY=build-only \
   QSTASH_NEXT_SIGNING_KEY=build-only \
+  UPSTASH_VECTOR_REST_URL=https://build.invalid \
+  UPSTASH_VECTOR_REST_TOKEN=build-only \
   pnpm --filter web build
 
 FROM node:23.11.0-bookworm-slim AS runtime
