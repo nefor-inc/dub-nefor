@@ -6,6 +6,7 @@ import { isNotHostedImage } from "@/lib/storage";
 import { NewLinkProps, ProcessedLinkProps } from "@/lib/types";
 import {
   DUB_DOMAINS,
+  SHORT_DOMAIN,
   UTMTags,
   constructURLFromUTMParams,
   getApexDomain,
@@ -126,7 +127,7 @@ export async function processLink<T extends Record<string, any>>({
 
   // if domain is not defined, set it to the workspace's primary domain
   if (!domain) {
-    domain = domains?.find((d) => d.primary)?.slug || "dub.sh";
+    domain = domains?.find((d) => d.primary)?.slug || SHORT_DOMAIN;
   }
 
   // free plan restrictions
@@ -171,8 +172,8 @@ export async function processLink<T extends Record<string, any>>({
     };
   }
 
-  // checks for dub.sh and dub.link links
-  if (domain === "dub.sh" || domain === "dub.link") {
+  // checks for the default short domain and dub.link links
+  if (domain === SHORT_DOMAIN || domain === "dub.link") {
     // for dub.link: check if workspace plan is pro+
     if (domain === "dub.link" && (!workspace || workspace.plan === "free")) {
       return {
@@ -183,8 +184,8 @@ export async function processLink<T extends Record<string, any>>({
       };
     }
 
-    // for dub.sh: check if user exists (if userId is passed)
-    if (domain === "dub.sh" && userId) {
+    // for the default short domain: check if user exists (if userId is passed)
+    if (domain === SHORT_DOMAIN && userId) {
       const userExists = await checkIfUserExists(userId);
       if (!userExists) {
         return {
