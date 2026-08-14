@@ -13,7 +13,7 @@ export const APP_HOSTNAMES = new Set([
 
 export const APP_DOMAIN =
   process.env.NEXT_PUBLIC_SELF_HOSTED === "true"
-    ? `https://${SELF_HOSTED_APP_HOST}`
+    ? `https://${SELF_HOSTED_APP_HOST}/api`
     : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
       ? "https://app.dub.co"
       : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
@@ -40,11 +40,13 @@ export const API_HOSTNAMES = new Set([
 ]);
 
 export const API_DOMAIN =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-    ? "https://api.dub.co"
-    : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
-      ? "https://api-staging.dub.co"
-      : "http://api.localhost:8888";
+  process.env.NEXT_PUBLIC_SELF_HOSTED === "true"
+    ? `https://${SELF_HOSTED_APP_HOST}`
+    : process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+      ? "https://api.dub.co"
+      : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+        ? "https://api-staging.dub.co"
+        : "http://api.localhost:8888";
 
 export const ADMIN_HOSTNAMES = new Set([
   "admin.dub.co",

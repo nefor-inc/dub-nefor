@@ -3,7 +3,7 @@ import {
   PartnerProps,
   ProgramEnrollmentProps,
 } from "@/lib/types";
-import { toCentsNumber } from "@dub/utils";
+import { API_DOMAIN, toCentsNumber } from "@dub/utils";
 import { Dashboard, Link, Tag } from "@prisma/client";
 import { prefixWorkspaceId } from "../../workspaces/workspace-id";
 import { decodeLinkIfCaseSensitive } from "../case-sensitivity";
@@ -62,7 +62,7 @@ export const transformLink = (
     tagId: tags?.[0]?.id ?? null, // backwards compatibility
     tags,
     webhookIds,
-    qrCode: `https://api.dub.co/qr?url=${link.shortLink}?qr=1`,
+    qrCode: `${API_DOMAIN}/qr?url=${link.shortLink}?qr=1`,
     workspaceId: link.projectId ? prefixWorkspaceId(link.projectId) : null,
     ...(dashboard && { dashboardId: dashboard.id || null }),
   };
