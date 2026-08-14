@@ -386,13 +386,13 @@ const NAV_AREAS: SidebarNavAreas<SidebarNavData> = {
             exact: true,
           },
           ...(process.env.NEXT_PUBLIC_SELF_HOSTED !== "true"
-            ? [
+            ? ([
                 {
                   name: "Billing",
                   icon: Receipt2,
                   href: `/${slug}/settings/billing`,
                 },
-              ]
+              ] as const)
             : []),
           {
             name: "Domains",
