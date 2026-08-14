@@ -72,7 +72,10 @@ export const LoginFormContext = createContext<{
 });
 
 export default function LoginForm({
-  methods = [...authMethods],
+  methods =
+    process.env.NEXT_PUBLIC_SELF_HOSTED === "true"
+      ? ["email"]
+      : [...authMethods],
   next,
 }: {
   methods?: AuthMethod[];
