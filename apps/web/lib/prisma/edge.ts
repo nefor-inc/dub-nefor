@@ -1,13 +1,4 @@
-import { Client } from "@planetscale/database";
-import { PrismaPlanetScale } from "@prisma/adapter-planetscale";
-import { PrismaClient } from "@prisma/client";
-
-const client = new Client({
-  url: process.env.PLANETSCALE_DATABASE_URL || process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPlanetScale(client);
-
-export const prismaEdge = new PrismaClient({
-  adapter,
-});
+// Self-hosted deployments run these routes on Node.js and connect to a normal
+// MySQL server. Keep the upstream export name so callers do not need to care
+// which database transport is in use.
+export { prisma as prismaEdge } from "./index";
