@@ -10,7 +10,12 @@ import {
   createWorkspaceSchema,
   WorkspaceSchema,
 } from "@/lib/zod/schemas/workspaces";
-import { FREE_WORKSPACES_LIMIT, nanoid, R2_URL } from "@dub/utils";
+import {
+  ENTERPRISE_PLAN,
+  FREE_WORKSPACES_LIMIT,
+  nanoid,
+  R2_URL,
+} from "@dub/utils";
 import { Prisma } from "@prisma/client";
 import { waitUntil } from "@vercel/functions";
 import { NextResponse } from "next/server";
@@ -89,7 +94,10 @@ export const POST = withSession(async ({ req, session }) => {
           },
         });
 
-        if (freeWorkspaces >= FREE_WORKSPACES_LIMIT) {
+        if (
+          process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" &&
+          freeWorkspaces >= FREE_WORKSPACES_LIMIT
+        ) {
           throw new DubApiError({
             code: "exceeded_limit",
             message: `You can only create up to ${FREE_WORKSPACES_LIMIT} free workspaces. Additional workspaces require a paid plan.`,
@@ -119,6 +127,21 @@ export const POST = withSession(async ({ req, session }) => {
             billingCycleStart: new Date().getDate(),
             invoicePrefix: generateRandomString(8),
             inviteCode: nanoid(24),
+            ...(process.env.NEXT_PUBLIC_SELF_HOSTED === "true" && {
+              plan: "enterprise",
+              usageLimit: ENTERPRISE_PLAN.limits.clicks,
+              linksLimit: ENTERPRISE_PLAN.limits.links,
+              payoutsLimit: ENTERPRISE_PLAN.limits.payouts,
+              domainsLimit: 1,
+              tagsLimit: ENTERPRISE_PLAN.limits.tags,
+              partnerTagsLimit: ENTERPRISE_PLAN.limits.partnerTags,
+              foldersLimit: ENTERPRISE_PLAN.limits.folders,
+              partnersLimit: ENTERPRISE_PLAN.limits.partners,
+              groupsLimit: ENTERPRISE_PLAN.limits.groups,
+              usersLimit: ENTERPRISE_PLAN.limits.users,
+              aiLimit: ENTERPRISE_PLAN.limits.ai,
+              networkInvitesLimit: ENTERPRISE_PLAN.limits.networkInvites,
+            }),
             defaultDomains: {
               create: {}, // by default, we give users all the default domains when they create a project
             },

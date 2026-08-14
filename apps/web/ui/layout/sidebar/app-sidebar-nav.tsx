@@ -385,11 +385,15 @@ const NAV_AREAS: SidebarNavAreas<SidebarNavData> = {
             href: `/${slug}/settings`,
             exact: true,
           },
-          {
-            name: "Billing",
-            icon: Receipt2,
-            href: `/${slug}/settings/billing`,
-          },
+          ...(process.env.NEXT_PUBLIC_SELF_HOSTED !== "true"
+            ? [
+                {
+                  name: "Billing",
+                  icon: Receipt2,
+                  href: `/${slug}/settings/billing`,
+                },
+              ]
+            : []),
           {
             name: "Domains",
             icon: Globe,

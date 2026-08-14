@@ -1,17 +1,17 @@
-import {
-  LOCALHOST_GEO_DATA,
-  LOCALHOST_IP,
-  capitalize,
-  fetchWithRetry,
-  getDomainWithoutWWW,
-} from "@dub/utils";
+import { capitalize, fetchWithRetry, getDomainWithoutWWW } from "@dub/utils";
 import { EU_COUNTRY_CODES } from "@dub/utils/src/constants/countries";
-import { geolocation, ipAddress, waitUntil } from "@vercel/functions";
+import { waitUntil } from "@vercel/functions";
 import { userAgent } from "next/server";
 import { recordClickCache } from "../api/links/record-click-cache";
 import { detectBot } from "../middleware/utils/detect-bot";
 import { detectQr } from "../middleware/utils/detect-qr";
 import { getIdentityHash } from "../middleware/utils/get-identity-hash";
+import {
+  getRequestContinent,
+  getRequestGeo,
+  getRequestIp,
+  getRequestRegion,
+} from "../self-hosted/request-geo";
 import { redis } from "../upstash";
 import { publishLinkClickEvent } from "../upstash/redis-streams/link-click-events";
 import { publishWorkspaceClickEvent } from "../upstash/redis-streams/workspace-click-events";
@@ -107,18 +107,10 @@ export async function recordClick({
   // get continent, region & geolocation data
   // interesting, geolocation().region is Vercel's edge region – NOT the actual region
   // so we use the x-vercel-ip-country-region to get the actual region
-  const { continent, region } =
-    process.env.VERCEL === "1"
-      ? {
-          continent: req.headers.get("x-vercel-ip-continent"),
-          region: req.headers.get("x-vercel-ip-country-region"),
-        }
-      : LOCALHOST_GEO_DATA;
-
-  const geo =
-    process.env.VERCEL === "1" ? geolocation(req) : LOCALHOST_GEO_DATA;
-
-  const ip = process.env.VERCEL === "1" ? ipAddress(req) : LOCALHOST_IP;
+  const continent = getRequestContinent(req);
+  const region = getRequestRegion(req);
+  const geo = getRequestGeo(req);
+  const ip = getRequestIp(req);
   const isEuCountry = geo.country && EU_COUNTRY_CODES.includes(geo.country);
 
   const referer = referrer || req.headers.get("referer");

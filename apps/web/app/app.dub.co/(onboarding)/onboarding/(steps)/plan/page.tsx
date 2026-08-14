@@ -12,6 +12,17 @@ import { PlanSelector } from "./plan-selector";
 export default function Plan() {
   const product = useOnboardingProduct();
 
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return (
+      <StepPage
+        title="Всё включено"
+        description="Внутренняя установка Nefor работает без тарифов и оплаты."
+      >
+        <LaterButton next="success">Перейти в рабочее пространство</LaterButton>
+      </StepPage>
+    );
+  }
+
   return (
     <StepPage
       title={

@@ -15,7 +15,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <>
       <div className="min-h-screen w-full bg-white">
-        <UpgradeBanner />
+        {process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" && <UpgradeBanner />}
         <MainNav
           sidebar={AppSidebarNav}
           toolContent={

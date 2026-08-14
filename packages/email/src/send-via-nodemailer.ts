@@ -19,14 +19,14 @@ export const sendViaNodeMailer = async ({
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASSWORD,
     },
-    secure: false,
+    secure: process.env.SMTP_SECURE === "true",
     tls: {
-      rejectUnauthorized: false,
+      rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
     },
   });
 
   return await transporter.sendMail({
-    from: "noreply@example.com",
+    from: process.env.SMTP_FROM || "Dub <noreply@nefor.vip>",
     to,
     subject,
     text,
