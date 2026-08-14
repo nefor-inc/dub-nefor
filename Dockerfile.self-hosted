@@ -25,6 +25,9 @@ RUN pnpm --filter web prisma:generate \
 RUN NEXTAUTH_SECRET=build-only \
   UPSTASH_REDIS_REST_TOKEN=build-only \
   TINYBIRD_API_KEY=build-only \
+  QSTASH_TOKEN=build-only \
+  QSTASH_CURRENT_SIGNING_KEY=build-only \
+  QSTASH_NEXT_SIGNING_KEY=build-only \
   pnpm --filter web build
 
 FROM node:23.11.0-bookworm-slim AS runtime
