@@ -6,7 +6,10 @@ import { SignUpEmail } from "./signup-email";
 import { SignUpOAuth } from "./signup-oauth";
 
 export const SignUpForm = ({
-  methods = ["email", "google", "github"],
+  methods =
+    process.env.NEXT_PUBLIC_SELF_HOSTED === "true"
+      ? ["email"]
+      : ["email", "google", "github"],
 }: {
   methods?: ("email" | "google" | "github")[];
 }) => {
