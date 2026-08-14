@@ -1,0 +1,149 @@
+services:
+  app:
+    image: ghcr.io/nefor-inc/dub-nefor:latest
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis-http:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_SELF_HOSTED: "true"
+      NEXT_PUBLIC_APP_DOMAIN: qr.nefor.vip
+      NEXT_PUBLIC_APP_SHORT_DOMAIN: qrlink.nefor.vip
+      NEXTAUTH_URL: https://qr.nefor.vip
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      CRON_SECRET: ${CRON_SECRET}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      DATABASE_URL: mysql://dub:${MYSQL_PASSWORD}@mysql:3306/dub
+      UPSTASH_REDIS_REST_URL: http://redis-http:80
+      UPSTASH_REDIS_REST_TOKEN: ${REDIS_HTTP_TOKEN}
+      UPSTASH_VECTOR_REST_URL: ${UPSTASH_VECTOR_REST_URL}
+      UPSTASH_VECTOR_REST_TOKEN: ${UPSTASH_VECTOR_REST_TOKEN}
+      QSTASH_URL: ${QSTASH_URL}
+      QSTASH_TOKEN: ${QSTASH_TOKEN}
+      QSTASH_CURRENT_SIGNING_KEY: ${QSTASH_CURRENT_SIGNING_KEY}
+      QSTASH_NEXT_SIGNING_KEY: ${QSTASH_NEXT_SIGNING_KEY}
+      TINYBIRD_API_URL: ${TINYBIRD_API_URL}
+      TINYBIRD_API_KEY: ${TINYBIRD_API_KEY}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      STORAGE_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY_ID}
+      STORAGE_SECRET_ACCESS_KEY: ${STORAGE_SECRET_ACCESS_KEY}
+      STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+      STORAGE_BASE_URL: ${STORAGE_BASE_URL}
+      STORAGE_PUBLIC_BUCKET: ${STORAGE_PUBLIC_BUCKET}
+      STORAGE_PRIVATE_BUCKET: ${STORAGE_PRIVATE_BUCKET}
+      SMTP_HOST: mail.nefor.vip
+      SMTP_PORT: "587"
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_FROM: "Dub QR <qr@nefor.vip>"
+      SMTP_SECURE: "false"
+      SMTP_TLS_REJECT_UNAUTHORIZED: "true"
+    expose:
+      - "3000"
+    mem_limit: 1536m
+    cpus: 1.0
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  mysql:
+    image: mysql:8.0.43
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: dub
+      MYSQL_USER: dub
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    command:
+      [
+        "--max_connections=100",
+        "--default-authentication-plugin=mysql_native_password",
+      ]
+    volumes:
+      - dub-mysql:/var/lib/mysql
+    mem_limit: 768m
+    cpus: 0.5
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4.6-alpine
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+      ]
+    volumes:
+      - dub-redis:/data
+    mem_limit: 128m
+    cpus: 0.25
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  redis-http:
+    image: hiett/serverless-redis-http:0.0.10
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: ${REDIS_HTTP_TOKEN}
+      SRH_CONNECTION_STRING: redis://:${REDIS_PASSWORD}@redis:6379
+      SRH_MAX_CONNECTIONS: "5"
+    mem_limit: 128m
+    cpus: 0.25
+
+  mysql-backup:
+    image: fradelg/mysql-cron-backup@sha256:d9b9b1514ef5f879031ea88c656c0b64acb98bb787f401c2fc3f62ed6fafb308
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_PASS: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DB: dub
+      CRON_TIME: "0 3 * * *"
+      MAX_BACKUPS: "14"
+      INIT_BACKUP: "0"
+      GZIP_LEVEL: "9"
+    volumes:
+      - dub-backups:/backup
+    mem_limit: 96m
+    cpus: 0.1
+
+volumes:
+  dub-mysql:
+  dub-redis:
+  dub-backups:

@@ -7,6 +7,10 @@ import {
 export { revalidate };
 
 export async function generateStaticParams() {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return [];
+  }
+
   return generateMarketplaceProgramStaticParams();
 }
 

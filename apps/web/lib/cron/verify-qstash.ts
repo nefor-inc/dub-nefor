@@ -11,8 +11,12 @@ export const verifyQstashSignature = async ({
   req: Request;
   rawBody: string; // Make sure to pass the raw body not the parsed JSON
 }) => {
-  // skip verification in local development
-  if (process.env.VERCEL !== "1") {
+  // Skip verification only in local development. Self-hosted production still
+  // receives public callbacks and must verify QStash signatures.
+  if (
+    process.env.VERCEL !== "1" &&
+    process.env.NEXT_PUBLIC_SELF_HOSTED !== "true"
+  ) {
     return;
   }
 

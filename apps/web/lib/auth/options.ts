@@ -17,7 +17,6 @@ import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import GithubProvider from "next-auth/providers/github";
-import GoogleProvider from "next-auth/providers/google";
 import { createId } from "../api/create-id";
 import { isProduction } from "../api/environment";
 import { isSamlEnforcedForEmailDomain } from "../api/workspaces/is-saml-enforced-for-email-domain";
@@ -97,6 +96,12 @@ export const authOptions: NextAuthOptions = {
   providers: [
     EmailProvider({
       async sendVerificationRequest({ identifier, url }) {
+        if (
+          process.env.NEXT_PUBLIC_SELF_HOSTED === "true" &&
+          !identifier.toLowerCase().endsWith("@nefor.vip")
+        ) {
+          throw new Error("Only @nefor.vip email addresses are allowed.");
+        }
         await assertRateLimit({
           policy: RATELIMIT_POLICIES.loginLinkSend,
           identifier,
@@ -113,11 +118,6 @@ export const authOptions: NextAuthOptions = {
           react: LoginLink({ url, email: identifier }),
         });
       },
-    }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      allowDangerousEmailAccountLinking: true,
     }),
     GithubProvider({
       clientId: process.env.GITHUB_CLIENT_ID as string,
@@ -394,6 +394,12 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     signIn: async ({ user, account, profile }) => {
+      if (
+        process.env.NEXT_PUBLIC_SELF_HOSTED === "true" &&
+        (!user.email || !user.email.toLowerCase().endsWith("@nefor.vip"))
+      ) {
+        return false;
+      }
       if (!user.email || (await isBlacklistedEmail(user.email))) {
         return false;
       }

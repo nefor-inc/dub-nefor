@@ -4,13 +4,11 @@ import {
   APP_DOMAIN,
   DUB_HEADERS,
   LEGAL_WORKSPACE_ID,
-  LOCALHOST_GEO_DATA,
   isDubDomain,
   isUnsupportedKey,
   nanoid,
   punyEncode,
 } from "@dub/utils";
-import { geolocation } from "@vercel/functions";
 import { cookies } from "next/headers";
 import {
   NextFetchEvent,
@@ -23,6 +21,7 @@ import { isCaseSensitiveDomain } from "../api/links/case-sensitivity";
 import { recordClickCache } from "../api/links/record-click-cache";
 import { getLinkViaEdge } from "../planetscale";
 import { getPartnerEnrollmentInfo } from "../planetscale/get-partner-enrollment-info";
+import { getRequestGeo } from "../self-hosted/request-geo";
 import { cacheDeepLinkClickData } from "./utils/cache-deeplink-click-data";
 import { crawlBitly } from "./utils/crawl-bitly";
 import { createResponseWithCookies } from "./utils/create-response-with-cookies";
@@ -314,10 +313,7 @@ export async function LinkMiddleware(req: NextRequest, ev: NextFetchEvent) {
   const isBot = detectBot(req);
   const ua = userAgent(req);
 
-  const { country } =
-    process.env.VERCEL === "1" && geolocation(req)
-      ? geolocation(req)
-      : LOCALHOST_GEO_DATA;
+  const { country } = getRequestGeo(req);
 
   // rewrite to proxy page ([domain]/[key]/proxy) if it's a bot and proxy is enabled
   if (isBot && proxy) {

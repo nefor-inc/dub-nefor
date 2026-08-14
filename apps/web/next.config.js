@@ -23,6 +23,8 @@ module.exports = withPlausibleProxy({
   scriptPath: "/_proxy/plausible/script.js",
   apiPath: "/_proxy/plausible/event",
 })({
+  output:
+    process.env.NEXT_PUBLIC_SELF_HOSTED === "true" ? "standalone" : undefined,
   reactStrictMode: false,
   transpilePackages: [
     "prettier",

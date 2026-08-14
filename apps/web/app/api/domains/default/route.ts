@@ -15,14 +15,7 @@ export const GET = withWorkspace(
         projectId: workspace.id,
       },
       select: {
-        dubsh: true,
-        chatgpt: true,
-        sptifi: true,
-        gitnew: true,
-        callink: true,
-        amznid: true,
-        ggllink: true,
-        figpage: true,
+        qrlinkneforvip: true,
       },
     });
 
@@ -33,7 +26,7 @@ export const GET = withWorkspace(
         .filter((key) => data[key])
         .map(
           (domain) =>
-            DUB_DOMAINS_ARRAY.find((d) => d.replace(".", "") === domain)!,
+            DUB_DOMAINS_ARRAY.find((d) => d.replaceAll(".", "") === domain)!,
         )
         .filter((domain) =>
           search ? domain?.toLowerCase().includes(search.toLowerCase()) : true,
@@ -63,14 +56,7 @@ export const PATCH = withWorkspace(
         projectId: workspace.id,
       },
       data: {
-        dubsh: defaultDomains.includes("dub.sh"),
-        chatgpt: defaultDomains.includes("chatg.pt"),
-        sptifi: defaultDomains.includes("spti.fi"),
-        gitnew: defaultDomains.includes("git.new"),
-        callink: defaultDomains.includes("cal.link"),
-        amznid: defaultDomains.includes("amzn.id"),
-        ggllink: defaultDomains.includes("ggl.link"),
-        figpage: defaultDomains.includes("fig.page"),
+        qrlinkneforvip: defaultDomains.includes("qrlink.nefor.vip"),
       },
     });
 
