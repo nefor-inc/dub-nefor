@@ -27,6 +27,9 @@ export const ratelimitOrThrow = async (
   const session = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
+    cookieName: process.env.VERCEL_URL
+      ? "__Secure-next-auth.session-token"
+      : "next-auth.session-token",
   });
   if (!session?.email) {
     const ip = ipAddress(req);
