@@ -8,7 +8,7 @@ export const DUB_DOMAINS = [
     primary: true,
     archived: false,
     placeholder: "https://nefor.vip",
-    allowedHostnames: [],
+    allowedHostnames: [] as string[],
     description: "Внутренний короткий домен Nefor.",
     projectId: DUB_WORKSPACE_ID,
   },
