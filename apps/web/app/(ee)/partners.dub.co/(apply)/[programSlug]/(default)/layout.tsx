@@ -38,6 +38,10 @@ export async function generateMetadata(props: {
 }
 
 export async function generateStaticParams() {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return [];
+  }
+
   const programs = await getProgramSlugs();
 
   return programs.map((program) => ({
