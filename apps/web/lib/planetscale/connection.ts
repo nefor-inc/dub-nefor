@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
  * can use Prisma's native MySQL connection directly.
  */
 export const conn = {
-  async execute<T = Record<string, unknown>>(
+  async execute<T = any>(
     query: string,
     params: unknown[] = [],
   ): Promise<{ rows: T[]; rowsAffected?: number }> {
